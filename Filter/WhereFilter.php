@@ -228,10 +228,10 @@ class WhereFilter extends AbstractFilter
                 $paramBefore,
                 $paramAfter
             );
-            $queryBuilder->setParameters([
-                $paramBefore => $value[0],
-                $paramAfter  => $value[1],
-            ]);
+            $queryBuilder
+                ->setParameter($paramBefore, $value[0])
+                ->setParameter($paramAfter, $value[1])
+            ;
 
             return $queryExpr;
         }
