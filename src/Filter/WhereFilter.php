@@ -15,9 +15,8 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
-use Dunglas\ApiBundle\Api\IriConverterInterface;
-use Dunglas\ApiBundle\Api\ResourceInterface;
-use Dunglas\ApiBundle\Doctrine\Orm\Filter\FilterInterface;
+use ApiPlatform\Core\Api\IriConverterInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\FilterInterface;
 use Fidry\LoopBackApiBundle\Http\Request\FilterQueryExtractorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -99,14 +98,14 @@ class WhereFilter implements FilterInterface
     /**
      * {@inheritdoc}
      */
-    public function apply(ResourceInterface $resource, QueryBuilder $queryBuilder)
+    public function apply(QueryBuilder $queryBuilder, string $resourceClass, string $operationName = null)
     {
         if (null === $request = $this->requestStack->getCurrentRequest()) {
             return null;
         }
 
         $queryValues = $this->queryExtractor->extractProperties($request);
-        $metadata = $this->getClassMetadata($resource);
+        $metadata = $this->getClassMetadata($resourceClass);
         $queryExpr = [];
         $aliases = [];
         $associationsMetadata = [];
@@ -416,7 +415,7 @@ class WhereFilter implements FilterInterface
      *
      * TODO
      */
-    public function getDescription(ResourceInterface $resource)
+    public function getDescription(string $resourceClass) : array
     {
         return [];
     }
@@ -554,14 +553,12 @@ class WhereFilter implements FilterInterface
     /**
      * Gets class metadata for the given resource.
      *
-     * @param ResourceInterface $resource
+     * @param string $class
      *
      * @return ClassMetadata
      */
-    private function getClassMetadata(ResourceInterface $resource)
+    private function getClassMetadata($entityClass)
     {
-        $entityClass = $resource->getEntityClass();
-
         return $this
             ->managerRegistry
             ->getManagerForClass($entityClass)
